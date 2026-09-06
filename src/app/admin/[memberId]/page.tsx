@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import AssignPlanForm from './AssignPlanForm'
 import Nav from '@/components/Nav'
 
 export default async function MemberDetailPage({
@@ -16,7 +15,7 @@ export default async function MemberDetailPage({
 
   const { data: currentMember } = await supabase
     .from('members')
-    .select('role, gym_id')
+    .select('role, clinic_id')
     .eq('id', user.id)
     .single()
 
@@ -28,21 +27,11 @@ export default async function MemberDetailPage({
     .eq('id', memberId)
     .single()
 
-  const { data: logs } = await supabase
-    .from('progress_logs')
+  const { data: weightLogs } = await supabase
+    .from('weight_logs')
     .select('*')
     .eq('member_id', memberId)
-    .order('logged_at', { ascending: false })
-
-  const { data: plans } = await supabase
-    .from('workout_plans')
-    .select('*, plan_exercises(*, exercises(name))')
-    .eq('member_id', memberId)
-    .order('created_at', { ascending: false })
-
-  const { data: exercises } = await supabase
-    .from('exercises')
-    .select('id, name, muscle_group')
+    .order('logged_date', { ascending: false })
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] p-6 max-w-4xl mx-auto">
@@ -53,57 +42,28 @@ export default async function MemberDetailPage({
         <h1 className="text-3xl font-bold tracking-tight">{member?.full_name || 'Member'}</h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">
-            Weight/Steps Log
-          </h2>
-          <div className="space-y-2">
-            {logs?.map((log) => (
-              <div
-                key={log.id}
-                className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-sm flex justify-between"
-              >
-                <span className="text-[var(--color-text-muted)]">{new Date(log.logged_at).toLocaleDateString()}</span>
-                <span>
-                  {log.weight_kg ? `${log.weight_kg} kg` : ''}
-                  {log.steps ? ` · ${log.steps} steps` : ''}
-                </span>
-              </div>
-            ))}
-            {(!logs || logs.length === 0) && (
-              <p className="text-[var(--color-text-muted)] text-sm">No logs yet.</p>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">
-            Workout Plans
-          </h2>
-          <div className="space-y-3">
-            {plans?.map((plan) => (
-              <div key={plan.id} className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-sm">
-                <p className="font-semibold">{plan.title}</p>
-                <p className="text-[var(--color-text-muted)] text-xs mb-2">{plan.goal}</p>
-                <ul className="text-[var(--color-text-muted)] space-y-1">
-                  {plan.plan_exercises?.map((pe: any) => (
-                    <li key={pe.id}>
-                      {pe.exercises?.name} — {pe.sets}x{pe.reps}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-            {(!plans || plans.length === 0) && (
-              <p className="text-[var(--color-text-muted)] text-sm">No plans yet.</p>
-            )}
-          </div>
+      <div>
+        <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">
+          Weight Log
+        </h2>
+        <div className="space-y-2">
+          {weightLogs?.map((log) => (
+            <div
+              key={log.id}
+              className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-sm flex justify-between"
+            >
+              <span className="text-[var(--color-text-muted)]">{new Date(log.logged_date).toLocaleDateString()}</span>
+              <span>{log.weight_kg} kg</span>
+            </div>
+          ))}
+          {(!weightLogs || weightLogs.length === 0) && (
+            <p className="text-[var(--color-text-muted)] text-sm">No logs yet.</p>
+          )}
         </div>
       </div>
 
-      <div className="mt-8">
-        <AssignPlanForm memberId={memberId} exercises={exercises || []} />
+      <div className="mt-8 rounded-lg border border-dashed border-[var(--color-border)] p-5 text-sm text-[var(--color-text-muted)]">
+        Diet plan assignment coming soon.
       </div>
     </div>
   )

@@ -6,7 +6,7 @@ function getSubdomain(request: NextRequest): string | null {
   const hostname = host.split(':')[0]
 
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return request.nextUrl.searchParams.get('gym')
+    return request.nextUrl.searchParams.get('clinic')
   }
 
   const parts = hostname.split('.')
@@ -25,7 +25,7 @@ export async function middleware(request: NextRequest) {
 
   const requestHeaders = new Headers(request.headers)
   if (subdomain) {
-    requestHeaders.set('x-gym-subdomain', subdomain)
+    requestHeaders.set('x-clinic-subdomain', subdomain)
   }
 
   let supabaseResponse = NextResponse.next({

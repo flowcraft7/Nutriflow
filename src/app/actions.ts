@@ -5,27 +5,27 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function completeSignup(userId: string, fullName: string) {
   const headersList = await headers()
-  const subdomain = headersList.get('x-gym-subdomain')
+  const subdomain = headersList.get('x-clinic-subdomain')
 
   if (!subdomain) {
-    return { error: "No gym context found. Please use your gym's link." }
+    return { error: "No clinic context found. Please use your clinic's link." }
   }
 
   const supabase = await createClient()
 
-  const { data: gym, error: gymError } = await supabase
-    .from('gyms')
+  const { data: clinic, error: clinicError } = await supabase
+    .from('clinics')
     .select('id')
     .eq('subdomain', subdomain)
     .single()
 
-  if (gymError || !gym) {
-    return { error: 'Gym not found for this link.' }
+  if (clinicError || !clinic) {
+    return { error: 'Clinic not found for this link.' }
   }
 
   const { error: memberError } = await supabase
     .from('members')
-    .insert({ id: userId, gym_id: gym.id, role: 'member', full_name: fullName })
+    .insert({ id: userId, clinic_id: clinic.id, role: 'member', full_name: fullName })
 
   if (memberError) {
     return { error: memberError.message }

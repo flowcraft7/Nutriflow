@@ -65,7 +65,7 @@ export default function AdminMemberTable({
               <th className="p-3 text-[var(--color-text-muted)] font-medium">Name</th>
               <th className="p-3 text-[var(--color-text-muted)] font-medium">Role</th>
               <th className="p-3 text-[var(--color-text-muted)] font-medium">Joined</th>
-              <th className="p-3 text-[var(--color-text-muted)] font-medium">Workouts (7d)</th>
+              <th className="p-3 text-[var(--color-text-muted)] font-medium">Logs (7d)</th>
               <th className="p-3 text-[var(--color-text-muted)] font-medium">Subscription</th>
               <th className="p-3 text-[var(--color-text-muted)] font-medium">Actions</th>
             </tr>

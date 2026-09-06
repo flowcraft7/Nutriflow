@@ -4,24 +4,24 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
-async function requireAdminGymId() {
+async function requireAdminClinicId() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
   const { data: member } = await supabase
     .from('members')
-    .select('role, gym_id')
+    .select('role, clinic_id')
     .eq('id', user.id)
     .single()
 
   if (!member || member.role !== 'admin') return null
-  return member.gym_id
+  return member.clinic_id
 }
 
 export async function addMemberManually(name: string, email: string, password: string) {
-  const gymId = await requireAdminGymId()
-  if (!gymId) return { error: 'Not authorized' }
+  const clinicId = await requireAdminClinicId()
+  if (!clinicId) return { error: 'Not authorized' }
 
   const admin = createAdminClient()
 
@@ -37,7 +37,7 @@ export async function addMemberManually(name: string, email: string, password: s
 
   const { error: memberError } = await admin.from('members').insert({
     id: newUser.user.id,
-    gym_id: gymId,
+    clinic_id: clinicId,
     full_name: name,
     role: 'member',
   })
@@ -51,8 +51,8 @@ export async function addMemberManually(name: string, email: string, password: s
 }
 
 export async function deleteMember(memberId: string) {
-  const gymId = await requireAdminGymId()
-  if (!gymId) return { error: 'Not authorized' }
+  const clinicId = await requireAdminClinicId()
+  if (!clinicId) return { error: 'Not authorized' }
 
   const admin = createAdminClient()
   const { error } = await admin.auth.admin.deleteUser(memberId)
@@ -66,12 +66,12 @@ export async function deleteMember(memberId: string) {
 }
 
 export async function postAnnouncement(message: string) {
-  const gymId = await requireAdminGymId()
-  if (!gymId) return { error: 'Not authorized' }
+  const clinicId = await requireAdminClinicId()
+  if (!clinicId) return { error: 'Not authorized' }
 
   const supabase = await createClient()
   const { error } = await supabase.from('announcements').insert({
-    gym_id: gymId,
+    clinic_id: clinicId,
     message,
   })
 
@@ -83,8 +83,8 @@ export async function postAnnouncement(message: string) {
 }
 
 export async function deleteAnnouncement(id: string) {
-  const gymId = await requireAdminGymId()
-  if (!gymId) return { error: 'Not authorized' }
+  const clinicId = await requireAdminClinicId()
+  if (!clinicId) return { error: 'Not authorized' }
 
   const supabase = await createClient()
   const { error } = await supabase.from('announcements').delete().eq('id', id)
@@ -96,56 +96,16 @@ export async function deleteAnnouncement(id: string) {
 }
 
 export async function updatePricePerMember(price: number) {
-  const gymId = await requireAdminGymId()
-  if (!gymId) return { error: 'Not authorized' }
+  const clinicId = await requireAdminClinicId()
+  if (!clinicId) return { error: 'Not authorized' }
 
   const supabase = await createClient()
   const { error } = await supabase
-    .from('gyms')
+    .from('clinics')
     .update({ price_per_member: price })
-    .eq('id', gymId)
+    .eq('id', clinicId)
 
   if (error) return { error: error.message }
-
-  revalidatePath('/admin')
-  return { success: true }
-}
-
-export async function assignPlanToMember(
-  memberId: string,
-  title: string,
-  exercises: { exercise_id: string; sets: number; reps: number; day_label: string }[]
-) {
-  const gymId = await requireAdminGymId()
-  if (!gymId) return { error: 'Not authorized' }
-
-  const supabase = await createClient()
-
-  const { data: plan, error: planError } = await supabase
-    .from('workout_plans')
-    .insert({
-      gym_id: gymId,
-      member_id: memberId,
-      title,
-      goal: 'Assigned by trainer',
-      ai_generated: false,
-    })
-    .select()
-    .single()
-
-  if (planError || !plan) return { error: planError?.message || 'Failed to create plan' }
-
-  for (let i = 0; i < exercises.length; i++) {
-    const ex = exercises[i]
-    await supabase.from('plan_exercises').insert({
-      plan_id: plan.id,
-      exercise_id: ex.exercise_id,
-      sets: ex.sets,
-      reps: ex.reps,
-      order_index: i,
-      day_label: ex.day_label,
-    })
-  }
 
   revalidatePath('/admin')
   return { success: true }

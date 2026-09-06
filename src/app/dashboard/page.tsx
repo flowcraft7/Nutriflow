@@ -1,6 +1,6 @@
 ﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { getCurrentGym } from '@/lib/get-current-gym'
+import { getCurrentClinic } from '@/lib/get-current-clinic'
 import Nav from '@/components/Nav'
 
 export default async function DashboardPage() {
@@ -11,7 +11,7 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
-  const gym = await getCurrentGym()
+  const clinic = await getCurrentClinic()
 
   const { data: member } = await supabase
     .from('members')
@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   const { data: announcements } = await supabase
     .from('announcements')
     .select('*')
-    .eq('gym_id', member?.gym_id)
+    .eq('clinic_id', member?.clinic_id)
     .order('created_at', { ascending: false })
     .limit(5)
 
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] p-6 max-w-4xl mx-auto">
-      <Nav gymName={gym?.name} />
+      <Nav clinicName={clinic?.name} />
 
       <div className="flex items-center gap-3">
         <div className="w-1 h-8 bg-[var(--color-accent)] rounded-full" />
@@ -55,26 +55,24 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
         <a
-          href="/exercises"
+          href="/food"
           className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 hover:bg-[#1d1d1b] hover:border-[var(--color-warn)] hover:-translate-y-0.5 transition-all"
         >
           <div className="w-9 h-9 rounded-md bg-[var(--color-warn)]/15 flex items-center justify-center mb-3">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-warn)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6.5 6.5 17.5 17.5" />
-              <path d="M21 21l-1-1" />
-              <path d="M3 3l1 1" />
-              <path d="M18 22l4-4" />
-              <path d="M2 6l4-4" />
-              <path d="M3 10l7-7" />
-              <path d="M14 21l7-7" />
+              <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
+              <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z" />
+              <line x1="6" x2="6" y1="1" y2="4" />
+              <line x1="10" x2="10" y1="1" y2="4" />
+              <line x1="14" x2="14" y1="1" y2="4" />
             </svg>
           </div>
-          <h2 className="font-semibold">Exercise Library</h2>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">Browse exercises by muscle group</p>
+          <h2 className="font-semibold">Food Log</h2>
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">Log meals & track daily calories</p>
         </a>
 
         <a
-          href="/plans"
+          href="/diet-plans"
           className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 hover:bg-[#1d1d1b] hover:border-[var(--color-accent)] hover:-translate-y-0.5 transition-all"
         >
           <div className="w-9 h-9 rounded-md bg-[var(--color-accent)]/15 flex items-center justify-center mb-3">
@@ -83,8 +81,8 @@ export default async function DashboardPage() {
               <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
             </svg>
           </div>
-          <h2 className="font-semibold">Workout Plans</h2>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">Your plans & AI-generated routines</p>
+          <h2 className="font-semibold">Diet Plans</h2>
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">Your calorie target & assigned plans</p>
         </a>
 
         <a
@@ -98,7 +96,7 @@ export default async function DashboardPage() {
             </svg>
           </div>
           <h2 className="font-semibold">Progress</h2>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">Weight, steps & measurements</p>
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">Weight, steps & trend</p>
         </a>
 
         {member?.role === 'admin' && (
@@ -115,7 +113,7 @@ export default async function DashboardPage() {
               </svg>
             </div>
             <h2 className="font-semibold text-[var(--color-accent)]">Admin Panel</h2>
-            <p className="text-sm text-[var(--color-text-muted)] mt-1">Manage gym members</p>
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">Manage clinic members</p>
           </a>
         )}
       </div>

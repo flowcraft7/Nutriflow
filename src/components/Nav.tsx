@@ -1,9 +1,9 @@
 export default function Nav({
-  gymName,
+  clinicName,
   backHref,
   backLabel = 'Dashboard',
 }: {
-  gymName?: string
+  clinicName?: string
   backHref?: string
   backLabel?: string
 }) {
@@ -16,8 +16,8 @@ export default function Nav({
           </a>
         )}
       </div>
-      {gymName && (
-        <span className="text-sm font-semibold tracking-tight">{gymName}</span>
+      {clinicName && (
+        <span className="text-sm font-semibold tracking-tight">{clinicName}</span>
       )}
     </div>
   )

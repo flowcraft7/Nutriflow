@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "FitFlow",
-  description: "Your gym, your plan, your progress.",
+  title: "NutriFlow",
+  description: "Your clinic, your plan, their progress.",
 };
 
 export default function RootLayout({
