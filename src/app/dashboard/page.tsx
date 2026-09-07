@@ -55,6 +55,20 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
         <a
+          href="/profile"
+          className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 hover:bg-[#1d1d1b] hover:border-[var(--color-accent)] hover:-translate-y-0.5 transition-all"
+        >
+          <div className="w-9 h-9 rounded-md bg-[var(--color-accent)]/15 flex items-center justify-center mb-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="5" />
+              <path d="M20 21a8 8 0 0 0-16 0" />
+            </svg>
+          </div>
+          <h2 className="font-semibold">Profile</h2>
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">Set your goal & calorie target</p>
+        </a>
+
+        <a
           href="/food"
           className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 hover:bg-[#1d1d1b] hover:border-[var(--color-warn)] hover:-translate-y-0.5 transition-all"
         >
