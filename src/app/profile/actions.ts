@@ -67,7 +67,7 @@ export async function updateProfile(data: {
     goal: data.goal,
   })
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from('members')
     .update({
       age: data.age,
@@ -80,13 +80,19 @@ export async function updateProfile(data: {
       daily_calorie_target: dailyCalorieTarget,
     })
     .eq('id', user.id)
+    .select()
 
   if (error) {
     return { error: error.message }
   }
 
+  if (!updated || updated.length === 0) {
+    return { error: 'Save blocked — no matching row updated. This is likely a permissions (RLS) issue.' }
+  }
+
   revalidatePath('/profile')
   revalidatePath('/dashboard')
   revalidatePath('/food')
+  revalidatePath('/diet-plans')
   return { success: true, dailyCalorieTarget }
 }
