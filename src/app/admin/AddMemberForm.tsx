@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { addMemberManually } from './member-actions'
 
 export default function AddMemberForm() {
@@ -10,34 +9,29 @@ export default function AddMemberForm() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
-  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-    setSuccess(false)
 
-    const result = await addMemberManually(name, email, password)
+    const res = await addMemberManually(name, email, password)
 
-    if (result.error) {
-      setError(result.error)
+    if (res.error) {
+      setError(res.error)
     } else {
       setName('')
       setEmail('')
       setPassword('')
-      setSuccess(true)
-      router.refresh()
     }
 
     setLoading(false)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-      <h2 className="font-semibold mb-3">Add Walk-in Member</h2>
-      <div className="space-y-2">
+    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+      <h2 className="font-semibold mb-3">Add Client</h2>
+      <form onSubmit={handleSubmit} className="space-y-2">
         <input
           type="text"
           placeholder="Full name"
@@ -55,23 +49,23 @@ export default function AddMemberForm() {
           className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-accent)]"
         />
         <input
-          type="text"
+          type="password"
           placeholder="Temporary password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          minLength={6}
           className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[var(--color-accent)]"
         />
+        {error && <p className="text-red-400 text-xs">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-md px-3 py-2 text-sm font-semibold disabled:opacity-50 hover:opacity-90 transition-opacity"
+          className="w-full bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-md py-2 text-sm font-semibold disabled:opacity-50 hover:opacity-90 transition-opacity"
         >
-          {loading ? 'Adding...' : 'Add Member'}
+          {loading ? 'Adding...' : 'Add Client'}
         </button>
-      </div>
-      {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
-      {success && <p className="text-[var(--color-positive)] text-xs mt-2">Member added.</p>}
-    </form>
+      </form>
+    </div>
   )
 }

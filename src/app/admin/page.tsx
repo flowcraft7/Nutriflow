@@ -68,7 +68,7 @@ export default async function AdminPage() {
         <div className="w-1 h-8 bg-[var(--color-accent)] rounded-full" />
         <h1 className="text-3xl font-bold tracking-tight">{clinic?.name} — Admin</h1>
       </div>
-      <p className="text-[var(--color-text-muted)] mb-6 ml-4">{members?.length || 0} members</p>
+      <p className="text-[var(--color-text-muted)] mb-6 ml-4">{members?.length || 0} clients</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <RevenuePanel currentPrice={clinic?.price_per_member || 0} activeCount={activeCount} />

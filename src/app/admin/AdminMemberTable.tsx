@@ -30,7 +30,7 @@ export default function AdminMemberTable({
   })
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Remove ${name || 'this member'}? This cannot be undone.`)) return
+    if (!confirm(`Remove ${name || 'this client'}? This cannot be undone.`)) return
     setDeletingId(id)
     await deleteMember(id)
     setDeletingId(null)
@@ -62,11 +62,11 @@ export default function AdminMemberTable({
         <table className="w-full text-sm">
           <thead className="bg-[var(--color-bg)] text-left">
             <tr>
-              <th className="p-3 text-[var(--color-text-muted)] font-medium">Name</th>
+              <th className="p-3 text-[var(--color-text-muted)] font-medium">Client</th>
               <th className="p-3 text-[var(--color-text-muted)] font-medium">Role</th>
               <th className="p-3 text-[var(--color-text-muted)] font-medium">Joined</th>
-              <th className="p-3 text-[var(--color-text-muted)] font-medium">Logs (7d)</th>
-              <th className="p-3 text-[var(--color-text-muted)] font-medium">Subscription</th>
+              <th className="p-3 text-[var(--color-text-muted)] font-medium">Meals Logged (7d)</th>
+              <th className="p-3 text-[var(--color-text-muted)] font-medium">Plan</th>
               <th className="p-3 text-[var(--color-text-muted)] font-medium">Actions</th>
             </tr>
           </thead>
@@ -74,7 +74,7 @@ export default function AdminMemberTable({
             {filtered.map((m) => (
               <tr key={m.id} className="border-t border-[var(--color-border)]">
                 <td className="p-3">
-                  <a href={`/admin/${m.id}`} className="hover:text-[var(--color-accent)] transition-colors">
+                  <a href={`/admin/${m.id}`} className="hover:text-[var(--color-accent)] transition-colors font-medium">
                     {m.full_name || '—'}
                   </a>
                 </td>
@@ -90,7 +90,10 @@ export default function AdminMemberTable({
                     currentExpiresOn={m.subscription_expires_on}
                   />
                 </td>
-                <td className="p-3">
+                <td className="p-3 flex items-center gap-3">
+                  <a href={`/admin/${m.id}`} className="text-[var(--color-accent)] text-xs hover:underline">
+                    Assign Diet Plan
+                  </a>
                   {m.role !== 'admin' && (
                     <button
                       onClick={() => handleDelete(m.id, m.full_name)}
@@ -106,7 +109,7 @@ export default function AdminMemberTable({
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={6} className="p-3 text-center text-[var(--color-text-muted)]">
-                  No members found.
+                  No clients found.
                 </td>
               </tr>
             )}
