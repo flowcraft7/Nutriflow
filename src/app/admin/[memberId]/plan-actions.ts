@@ -156,12 +156,24 @@ Respond with ONLY a raw JSON object. Do not include any explanation, markdown fo
   try {
     const completion = await groq.chat.completions.create({
       model: 'openai/gpt-oss-120b',
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a JSON API. You only respond with valid, complete JSON objects. Never include explanations, markdown, or reasoning text outside the JSON.',
+        },
+        { role: 'user', content: prompt },
+      ],
       temperature: 0.5,
+      max_tokens: 4000,
+      response_format: { type: 'json_object' },
     })
     aiResponse = completion.choices[0]?.message?.content || ''
   } catch (err: any) {
     return { error: `AI generation failed: ${err.message}` }
+  }
+
+  if (!aiResponse || aiResponse.trim().length === 0) {
+    return { error: 'AI returned an empty response. This can happen with tight constraints — try widening the calorie range or budget, then try again.' }
   }
 
   let parsed
