@@ -165,7 +165,6 @@ Respond with ONLY a raw JSON object. Do not include any explanation, markdown fo
       ],
       temperature: 0.5,
       max_tokens: 4000,
-      response_format: { type: 'json_object' },
     })
     aiResponse = completion.choices[0]?.message?.content || ''
   } catch (err: any) {
