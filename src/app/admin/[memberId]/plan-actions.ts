@@ -79,6 +79,20 @@ export async function assignDietPlan({
   return { success: true }
 }
 
+function extractJson(raw: string): any {
+  let cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim()
+
+  const firstBrace = cleaned.indexOf('{')
+  const lastBrace = cleaned.lastIndexOf('}')
+
+  if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+    throw new Error('No JSON object found in AI response')
+  }
+
+  const jsonSlice = cleaned.slice(firstBrace, lastBrace + 1)
+  return JSON.parse(jsonSlice)
+}
+
 export async function generateAIDietPlan({
   memberId,
   minCalories,
@@ -114,7 +128,7 @@ export async function generateAIDietPlan({
 
   const dailyBudget = Math.round(weeklyBudgetPkr / 7)
 
-  const prompt = `You are a nutrition planner for a Pakistani diet clinic. Build a 7-day meal plan using ONLY the foods listed below (use their exact "id" values). 
+  const prompt = `You are a nutrition planner for a Pakistani diet clinic. Build a 7-day meal plan using ONLY the foods listed below (use their exact "id" values).
 
 Constraints for EACH day:
 - Total calories between ${minCalories} and ${maxCalories}
@@ -126,7 +140,7 @@ Vary the foods across days for variety. Each day should have breakfast, lunch, d
 Available foods (with price per portion in PKR):
 ${foodList}
 
-Respond with ONLY valid JSON, no markdown, no explanation, in this exact format:
+Respond with ONLY a raw JSON object. Do not include any explanation, markdown formatting, or code fences — just the JSON itself, starting with { and ending with }. Use this exact structure:
 {
   "days": [
     {
@@ -143,7 +157,7 @@ Respond with ONLY valid JSON, no markdown, no explanation, in this exact format:
     const completion = await groq.chat.completions.create({
       model: 'openai/gpt-oss-120b',
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7,
+      temperature: 0.5,
     })
     aiResponse = completion.choices[0]?.message?.content || ''
   } catch (err: any) {
@@ -152,10 +166,9 @@ Respond with ONLY valid JSON, no markdown, no explanation, in this exact format:
 
   let parsed
   try {
-    const cleaned = aiResponse.replace(/```json|```/g, '').trim()
-    parsed = JSON.parse(cleaned)
+    parsed = extractJson(aiResponse)
   } catch {
-    return { error: 'AI returned invalid format. Try again.' }
+    return { error: `AI returned invalid format. Raw response started with: "${aiResponse.slice(0, 150)}..." — try again.` }
   }
 
   const foodMap = new Map(foods.map((f) => [f.id, f]))
