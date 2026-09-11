@@ -164,8 +164,9 @@ Respond with ONLY a raw JSON object. Do not include any explanation, markdown fo
         { role: 'user', content: prompt },
       ],
       temperature: 0.5,
-      max_tokens: 4000,
-    })
+      max_tokens: 8000,
+      reasoning_effort: 'low',
+    } as any)
     aiResponse = completion.choices[0]?.message?.content || ''
   } catch (err: any) {
     return { error: `AI generation failed: ${err.message}` }
