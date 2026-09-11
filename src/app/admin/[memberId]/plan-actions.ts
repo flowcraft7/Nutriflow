@@ -116,37 +116,37 @@ export async function generateAIDietPlan({
   const { data: foods } = await supabase
     .from('foods')
     .select('id, name, category, restaurant_name, portion_label, calories, protein_g, carbs_g, fat_g, price_pkr')
-    .limit(200)
+    .limit(60)
 
   if (!foods || foods.length === 0) {
     return { error: 'No foods in database to build a plan from.' }
   }
 
   const foodList = foods
-    .map((f) => `id:${f.id} | ${f.name}${f.restaurant_name ? ` (${f.restaurant_name})` : ''} | ${f.portion_label} | ${f.calories}kcal | ${f.protein_g}g protein | Rs${f.price_pkr}/portion`)
+    .map((f) => `${f.id}|${f.name}${f.restaurant_name ? `(${f.restaurant_name})` : ''}|${f.calories}kcal|${f.protein_g}p|Rs${f.price_pkr}`)
     .join('\n')
 
   const dailyBudget = Math.round(weeklyBudgetPkr / 7)
 
-  const prompt = `You are a nutrition planner for a Pakistani diet clinic. Build a 7-day meal plan using ONLY the foods listed below (use their exact "id" values).
+  const prompt = `You are a nutrition planner for a Pakistani diet clinic. Build a 7-day meal plan using ONLY the foods listed below (use their exact id values, the part before the first "|").
 
 Constraints for EACH day:
 - Total calories between ${minCalories} and ${maxCalories}
 - Approximately ${targetProtein}g protein
-- Total food cost should not exceed Rs${dailyBudget} (this is a daily portion of a Rs${weeklyBudgetPkr} weekly budget) — prefer cheaper home_food items over expensive restaurant items to stay within budget, and only use restaurant items occasionally if budget allows.
+- Total food cost should not exceed Rs${dailyBudget}/day (part of a Rs${weeklyBudgetPkr} weekly budget) — prefer cheaper items, use expensive restaurant items sparingly.
 
-Vary the foods across days for variety. Each day should have breakfast, lunch, dinner, and optionally a snack.
+Vary foods across days. Each day: breakfast, lunch, dinner, optional snack.
 
-Available foods (with price per portion in PKR):
+Foods (format: id|name|calories|protein|price):
 ${foodList}
 
-Respond with ONLY a raw JSON object. Do not include any explanation, markdown formatting, or code fences — just the JSON itself, starting with { and ending with }. Use this exact structure:
+Respond with ONLY a raw JSON object, no explanation, no markdown, starting with { and ending with }:
 {
   "days": [
     {
       "day_label": "Day 1",
       "items": [
-        { "food_id": "<uuid from list above>", "quantity": 1, "meal_type": "breakfast" }
+        { "food_id": "<id>", "quantity": 1, "meal_type": "breakfast" }
       ]
     }
   ]
@@ -164,7 +164,7 @@ Respond with ONLY a raw JSON object. Do not include any explanation, markdown fo
         { role: 'user', content: prompt },
       ],
       temperature: 0.5,
-      max_tokens: 8000,
+      max_tokens: 3000,
       reasoning_effort: 'low',
     } as any)
     aiResponse = completion.choices[0]?.message?.content || ''
