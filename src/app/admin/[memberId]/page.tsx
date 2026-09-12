@@ -76,12 +76,42 @@ export default async function MemberDetailPage({
                 Existing Plans
               </h2>
               <div className="space-y-2">
-                {plans.map((plan) => (
-                  <div key={plan.id} className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-sm">
-                    <p className="font-semibold">{plan.title}</p>
-                    <p className="text-xs text-[var(--color-text-muted)]">{plan.diet_plan_foods?.length || 0} items</p>
-                  </div>
-                ))}
+                {plans.map((plan) => {
+                  const dayGroups: Record<string, any[]> = {}
+                  plan.diet_plan_foods?.forEach((pf: any) => {
+                    const day = pf.day_label || 'Unassigned'
+                    if (!dayGroups[day]) dayGroups[day] = []
+                    dayGroups[day].push(pf)
+                  })
+
+                  return (
+                    <details key={plan.id} className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-sm group">
+                      <summary className="font-semibold cursor-pointer flex items-center justify-between">
+                        <span>{plan.title}</span>
+                        <span className="text-xs text-[var(--color-text-muted)] font-normal">{plan.diet_plan_foods?.length || 0} items</span>
+                      </summary>
+                      {plan.notes && <p className="text-xs text-[var(--color-text-muted)] mt-2">{plan.notes}</p>}
+                      <div className="mt-3 space-y-3">
+                        {Object.entries(dayGroups).map(([day, items]) => (
+                          <div key={day}>
+                            <p className="text-xs font-semibold text-[var(--color-accent)] mb-1">{day}</p>
+                            <ul className="space-y-1">
+                              {items.map((pf: any) => (
+                                <li key={pf.id} className="text-xs text-[var(--color-text-muted)] flex justify-between">
+                                  <span>{pf.foods?.name} ({pf.meal_type})</span>
+                                  <span>{pf.quantity} × {pf.foods?.portion_label}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                        {(!plan.diet_plan_foods || plan.diet_plan_foods.length === 0) && (
+                          <p className="text-xs text-[var(--color-text-muted)]">No items in this plan.</p>
+                        )}
+                      </div>
+                    </details>
+                  )
+                })}
               </div>
             </div>
           )}
